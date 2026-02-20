@@ -1,28 +1,42 @@
 package note
 
 import (
+	"bufio"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
 )
 
 const noteError = "could not create note"
-const noteCreated = "Note created!"
+const noteCreated = "Note CreatedAt!"
 const invalidNoteError = "you must have something in your note"
 const titlePrompt = "What is the title of your note?"
 const contentPrompt = "What is your note?"
+const noteSaveError = "could not save note"
 
 type Note struct {
-	id      string
-	title   string
-	content string
-	created time.Time
+	Id        string    `json:"uuid"`
+	Title     string    `json:"title"`
+	Content   string    `json:"content"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 func (n Note) noteInfo() {
-	fmt.Printf("Note ID: %s\nTitle: %s\nContent: %s\n", n.id, n.title, n.content)
+	fmt.Printf("Note ID: %s\nTitle: %s\nContent: %s\n", n.Id, n.Title, n.Content)
+}
+
+func (n Note) save() error {
+	fileName := n.Id + ".json"
+	jsonFile, err := json.Marshal(n)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(fileName, jsonFile, 0644)
 }
 
 type Notes []Note
@@ -39,10 +53,10 @@ func New(title, content string) (*Note, error) {
 	}
 
 	return &Note{
-		id:      uuid.New().String(),
-		title:   title,
-		content: content,
-		created: time.Now(),
+		Id:        uuid.New().String(),
+		Title:     title,
+		Content:   content,
+		CreatedAt: time.Now(),
 	}, nil
 }
 
@@ -63,12 +77,14 @@ func CreateNewNote() {
 		fmt.Println(err)
 		return
 	}
-
 	// write to JSON file
-
+	err = note.save()
+	if err != nil {
+		fmt.Println(noteSaveError)
+	}
 	// show success message
 	fmt.Println(noteCreated)
-	fmt.Printf("Note title: %v\nNote content: %v\n", note.title, note.content)
+	fmt.Printf("Note title: %v\nNote content: %v\n", note.Title, note.Content)
 }
 
 func getNoteData() (title string, content string) {
@@ -81,6 +97,11 @@ func getNoteData() (title string, content string) {
 
 func getNoteInput(prompt string) (input string) {
 	fmt.Println(prompt)
-	fmt.Scanln(&input)
+	input, err := bufio.NewReader(os.Stdin).ReadString('\n')
+	if err != nil {
+		return ""
+	}
+	input = strings.TrimSuffix(input, "\n")
+	input = strings.TrimSuffix(input, "\r")
 	return input
 }
