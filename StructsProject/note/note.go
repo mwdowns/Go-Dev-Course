@@ -12,6 +12,7 @@ import (
 	"github.com/google/uuid"
 )
 
+const jsonFileName = "notes.json"
 const noteError = "could not create note"
 const noteCreated = "Note CreatedAt!"
 const invalidNoteError = "you must have something in your note"
@@ -31,17 +32,16 @@ func (n Note) noteInfo() {
 }
 
 func (n Note) save() error {
-	fileName := n.Id + ".json"
 	jsonFile, err := json.Marshal(n)
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(fileName, jsonFile, 0644)
+	return os.WriteFile(jsonFileName, jsonFile, 0644)
 }
 
 type Notes []Note
 
-func (n Notes) showNotes() {
+func (n Notes) showNotesInfo() {
 	for _, note := range n {
 		note.noteInfo()
 	}
@@ -60,11 +60,26 @@ func New(title, content string) (*Note, error) {
 	}, nil
 }
 
-func ShowNotes() {
-	note1, _ := New("first note", "first content")
-	note2, _ := New("second note", "second content")
-	notes := Notes{*note1, *note2}
-	notes.showNotes()
+func getNotes() Notes {
+	fmt.Println("this would get notes from an existing json file of notes, and create an empty json file if none exists")
+	return make(Notes, 0)
+	// look for JSON file of name "notes.json"
+	// if no file exists, create it
+	// else, extract JSON info to display
+	// if no JSON info exists, return empty slice
+	// else take JSON info and turn them in to a Notes slice
+}
+
+func DisplayNotes() {
+	notes := getNotes()
+	//note1, _ := New("first note", "first content")
+	//note2, _ := New("second note", "second content")
+	//notes := Notes{*note1, *note2}
+	if len(notes) != 0 {
+		notes.showNotesInfo()
+	}
+	fmt.Println("No notes found")
+	return
 }
 
 func CreateNewNote() {

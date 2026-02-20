@@ -19,7 +19,7 @@ func getMenuInput(prompt string) (input int, err error) {
 func executeInput(input int) {
 	switch input {
 	case 1:
-		note.ShowNotes()
+		note.DisplayNotes()
 	case 2:
 		note.CreateNewNote()
 	default:
