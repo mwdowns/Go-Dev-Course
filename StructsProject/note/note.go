@@ -32,6 +32,9 @@ func (n Note) noteInfo() {
 }
 
 func (n Note) save() error {
+	// this should get the JSON file
+	// if no JSON file exists, create one
+	// append note to file
 	jsonFile, err := json.Marshal(n)
 	if err != nil {
 		return err
@@ -64,9 +67,7 @@ func getNotes() Notes {
 	fmt.Println("this would get notes from an existing json file of notes, and create an empty json file if none exists")
 	return make(Notes, 0)
 	// look for JSON file of name "notes.json"
-	// if no file exists, create it
-	// else, extract JSON info to display
-	// if no JSON info exists, return empty slice
+	// if no JSON info exists, return empty slice and the "you should create a note message"
 	// else take JSON info and turn them in to a Notes slice
 }
 
