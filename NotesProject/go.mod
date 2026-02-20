@@ -1,4 +1,4 @@
-module mwdowns.me/go-notes
+module mwdowns.me/go-notes-and-todos
 
 go 1.25.0
 

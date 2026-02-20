@@ -12,9 +12,9 @@ import (
 	"github.com/google/uuid"
 )
 
-const jsonFileName = "notes.json"
+const noteFileName = "notes.json"
 const noteError = "could not create note"
-const noteCreated = "Note CreatedAt!"
+const noteCreated = "Note Created!"
 const invalidNoteError = "you must have something in your note"
 const titlePrompt = "What is the title of your note?"
 const contentPrompt = "What is your note?"
@@ -28,7 +28,7 @@ type Note struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-func (n Note) noteInfo() {
+func (n Note) info() {
 	fmt.Printf("Note ID: %s\nTitle: %s\nContent: %s\n", n.Id, n.Title, n.Content)
 }
 
@@ -40,14 +40,14 @@ func (n Note) save() error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(jsonFileName, jsonFile, 0644)
+	return os.WriteFile(noteFileName, jsonFile, 0644)
 }
 
 type Notes []Note
 
 func (n Notes) showNotesInfo() {
 	for _, note := range n {
-		note.noteInfo()
+		note.info()
 	}
 }
 
@@ -99,7 +99,7 @@ func CreateNewNote() {
 	}
 	// show success message
 	fmt.Println(noteCreated)
-	fmt.Printf("Note title: %v\nNote content: %v\n", note.Title, note.Content)
+	fmt.Printf("note title: %v\nnote content: %v\n", note.Title, note.Content)
 }
 
 func getNoteData() (title string, content string) {
