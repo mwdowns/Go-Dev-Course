@@ -19,6 +19,7 @@ const invalidNoteError = "you must have something in your note"
 const titlePrompt = "What is the title of your note?"
 const contentPrompt = "What is your note?"
 const noteSaveError = "could not save note"
+const createYourFirstNoteMessage = "No notes found. You should create a note!"
 
 type Note struct {
 	Id        string    `json:"uuid"`
@@ -64,10 +65,9 @@ func New(title, content string) (*Note, error) {
 }
 
 func getNotes() Notes {
-	fmt.Println("this would get notes from an existing json file of notes, and create an empty json file if none exists")
 	return make(Notes, 0)
 	// look for JSON file of name "notes.json"
-	// if no JSON info exists, return empty slice and the "you should create a note message"
+	// if no JSON info exists, return empty slice
 	// else take JSON info and turn them in to a Notes slice
 }
 
@@ -79,8 +79,7 @@ func DisplayNotes() {
 	if len(notes) != 0 {
 		notes.showNotesInfo()
 	}
-	fmt.Println("No notes found")
-	return
+	fmt.Println(createYourFirstNoteMessage)
 }
 
 func CreateNewNote() {
