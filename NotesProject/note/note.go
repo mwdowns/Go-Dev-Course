@@ -32,7 +32,7 @@ func (n Note) info() {
 	fmt.Printf("Note ID: %s\nTitle: %s\nContent: %s\n", n.Id, n.Title, n.Content)
 }
 
-func (n Note) save() error {
+func (n Note) Save() error {
 	// this should get the JSON file
 	// if no JSON file exists, create one
 	// append note to file
@@ -41,6 +41,11 @@ func (n Note) save() error {
 		return err
 	}
 	return os.WriteFile(noteFileName, jsonFile, 0644)
+}
+
+func (n Note) SuccessMessage() {
+	fmt.Println(noteCreated)
+	fmt.Printf("note title: %v\nnote content: %v\n", n.Title, n.Content)
 }
 
 type Notes []Note
@@ -64,13 +69,6 @@ func New(title, content string) (*Note, error) {
 	}, nil
 }
 
-func getNotes() Notes {
-	return make(Notes, 0)
-	// look for JSON file of name "notes.json"
-	// if no JSON info exists, return empty slice
-	// else take JSON info and turn them in to a Notes slice
-}
-
 func DisplayNotes() {
 	notes := getNotes()
 	//note1, _ := New("first note", "first content")
@@ -82,7 +80,7 @@ func DisplayNotes() {
 	fmt.Println(createYourFirstNoteMessage)
 }
 
-func CreateNewNote() {
+func CreateNewNote() (Note, error) {
 	title, content := getNoteData()
 	// create note using New
 	note, err := New(title, content)
@@ -90,16 +88,16 @@ func CreateNewNote() {
 	if err != nil {
 		fmt.Println(noteError)
 		fmt.Println(err)
-		return
+		return Note{}, err
 	}
-	// write to JSON file
-	err = note.save()
-	if err != nil {
-		fmt.Println(noteSaveError)
-	}
-	// show success message
-	fmt.Println(noteCreated)
-	fmt.Printf("note title: %v\nnote content: %v\n", note.Title, note.Content)
+	return *note, nil
+}
+
+func getNotes() Notes {
+	return make(Notes, 0)
+	// look for JSON file of name "notes.json"
+	// if no JSON info exists, return empty slice
+	// else take JSON info and turn them in to a Notes slice
 }
 
 func getNoteData() (title string, content string) {
