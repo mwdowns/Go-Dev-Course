@@ -4,14 +4,10 @@ import (
 	"errors"
 	"fmt"
 
+	"mwdowns.me/go-notes-and-todos/interfaces"
 	"mwdowns.me/go-notes-and-todos/note"
 	"mwdowns.me/go-notes-and-todos/todo"
 )
-
-type saver interface {
-	Save() error
-	SuccessMessage()
-}
 
 const welcomeMessage = "Welcome to Go Notes and Todos!"
 const menuPrompt = "Enter your choice: "
@@ -62,27 +58,24 @@ func executeInput(input int) {
 		note.DisplayNotes()
 	case 2:
 		n, err := note.CreateNewNote()
-		if err != nil {
-			fmt.Println(err)
-		}
-		saveObject(n)
+		saveObject(n, err)
 	case 3:
 		fmt.Println("...coming soon...")
 	case 4:
 		todo.DisplayTodos()
 	case 5:
 		td, err := todo.CreateNewTodo()
-		if err != nil {
-			fmt.Println(err)
-		}
-		saveObject(td)
+		saveObject(td, err)
 	default:
 		fmt.Println("wut?")
 	}
 }
 
-func saveObject(object saver) {
-	err := object.Save()
+func saveObject(object interfaces.Saver, err error) {
+	if err != nil {
+		fmt.Println(err)
+	}
+	err = object.Save()
 	if err != nil {
 		fmt.Println(err)
 	}
