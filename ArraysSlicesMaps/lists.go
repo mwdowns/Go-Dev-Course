@@ -12,6 +12,14 @@ type Product struct {
 	price float64
 }
 
+type productsMap map[string]Product
+
+func (p productsMap) showTitles() {
+	for _, product := range p {
+		fmt.Println(product.title)
+	}
+}
+
 func main() {
 	//array - fixed number of entries
 	prices := [4]float64{10.99, 20.0, 14.99, 5.99}
@@ -41,4 +49,17 @@ func main() {
 	websites := map[string]string{"google": "www.google.com", "amazon": "www.amazon.com"}
 	websites["linkedin"] = "www.linkedin.com"
 	fmt.Println(websites)
+
+	productStuff := make(productsMap)
+	for index, product := range products {
+		fmt.Println(index, product.id)
+		productStuff[product.id] = product
+	}
+	fmt.Println(productStuff)
+	productStuff.showTitles()
+
+	userNames := make([]string, 2)
+	userNames[0] = "Matt"
+	userNames[1] = "Jeri"
+	fmt.Println(userNames)
 }
