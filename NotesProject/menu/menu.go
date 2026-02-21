@@ -71,7 +71,7 @@ func executeInput(input int) {
 	}
 }
 
-func saveObject(object interfaces.Saver, err error) {
+func saveObject(object interfaces.SaveAndDisplay, err error) {
 	if err != nil {
 		fmt.Println(err)
 	}

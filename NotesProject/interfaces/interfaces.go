@@ -1,6 +1,6 @@
 package interfaces
 
-type Saver interface {
+type SaveAndDisplay interface {
 	Save() error
 	SuccessMessage()
 }
