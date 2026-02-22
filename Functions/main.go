@@ -2,13 +2,19 @@ package main
 
 import "fmt"
 
+type transformFn func(int) int
+
 func main() {
 	numbers := []int{1, 2, 3, 4}
-	fmt.Println(transformNumbers(&numbers, double))
+	// anonymous function that does the same thing as double, good for one-time uses
+	fmt.Println(transformNumbers(&numbers, func(number int) int {
+		return number * 2
+	}))
+	// passing the interface function "triple"
 	fmt.Println(transformNumbers(&numbers, triple))
 }
 
-func transformNumbers(numbers *[]int, transform func(int) int) []int {
+func transformNumbers(numbers *[]int, transform transformFn) []int {
 	dNumbers := []int{}
 	for _, number := range *numbers {
 		dNumbers = append(dNumbers, transform(number))
@@ -16,9 +22,9 @@ func transformNumbers(numbers *[]int, transform func(int) int) []int {
 	return dNumbers
 }
 
-func double(number int) int {
-	return number * 2
-}
+//func double(number int) int {
+//	return number * 2
+//}
 
 func triple(number int) int {
 	return number * 3
