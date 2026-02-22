@@ -18,6 +18,10 @@ func main() {
 
 	// recursion in go
 	fmt.Println(factorial(5))
+
+	// variadic
+	fmt.Println(sumUp(1, 3, 10, 56))
+	fmt.Println(sumUp(numbers...))
 }
 
 func transformNumbers(numbers *[]int, transform transformFn) []int {
@@ -52,4 +56,12 @@ func factorial(number int) int {
 	//	result = result * i
 	//}
 	//return result
+}
+
+func sumUp(numbers ...int) int {
+	sum := 0
+	for _, number := range numbers {
+		sum += number
+	}
+	return sum
 }
