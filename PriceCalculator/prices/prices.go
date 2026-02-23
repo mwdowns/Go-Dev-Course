@@ -1,75 +1,59 @@
 package prices
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 	"strconv"
 	"time"
+
+	"mwdowns.me/price-calculator/converter"
+	"mwdowns.me/price-calculator/filemanager"
 )
 
-const pricesFile = "prices.txt"
 const fileReaderError = "cannot read file, using defaults"
 
 var defaultPrices = []float64{10, 20, 30}
 
 type TaxIncludedPriceJob struct {
 	TaxRate           float64
+	IOManager         filemanager.FileManager
 	InputPrices       []float64
 	TaxIncludedPrices map[string]string
-	createdAt         time.Time
+	CreatedAt         time.Time
 }
 
-func (job *TaxIncludedPriceJob) loadData() {
+func (job *TaxIncludedPriceJob) loadData() ([]float64, error) {
 	// get prices from file
-	data, err := os.Open(pricesFile)
+	data, lines, err := job.IOManager.ReadFile()
 	if err != nil {
-		fmt.Println(fileReaderError)
-		fmt.Println(err)
-		return
+		return nil, err
 	}
-	scanner := bufio.NewScanner(data)
-	var lines []string
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
-	}
-	err = scanner.Err()
-	if err != nil {
-		fmt.Println(fileReaderError)
-		fmt.Println(err)
-		data.Close()
-		return
-	}
-	var prices = make([]float64, len(lines))
-	for index, line := range lines {
-		price, err2 := strconv.ParseFloat(line, 64)
-		if err2 != nil {
-			fmt.Println(fileReaderError)
-			fmt.Println(err2)
-			data.Close()
-			return
-		}
-		prices[index] = price
-	}
-	// everything successful, override default values
-	job.InputPrices = prices
+
+	return converter.StringsToFloats(data, lines)
 }
 
-func (job *TaxIncludedPriceJob) Process() {
-	job.loadData()
+func (job *TaxIncludedPriceJob) Process() error {
+	inputPrices, err := job.loadData()
+	if err != nil {
+		fmt.Println(fileReaderError)
+		return err
+	}
+	job.InputPrices = inputPrices
 	result := make(map[string]string)
 	for _, price := range job.InputPrices {
 		taxPrice := (1 + job.TaxRate) * price
 		result[strconv.FormatFloat(price, 'f', 2, 64)] = strconv.FormatFloat(taxPrice, 'f', 2, 64)
 	}
 	job.TaxIncludedPrices = result
-	fmt.Println(result)
+	job.IOManager.WriteJson(job)
+	return nil
 }
 
-func NewTaxIncludedPriceJob(taxRate float64) *TaxIncludedPriceJob {
+func NewTaxIncludedPriceJob(fm filemanager.FileManager, taxRate float64) *TaxIncludedPriceJob {
 	// Input prices is set to a default and will be overridden by the loadData function
 	return &TaxIncludedPriceJob{
 		TaxRate:     taxRate,
+		IOManager:   fm,
 		InputPrices: defaultPrices,
+		CreatedAt:   time.Now(),
 	}
 }
