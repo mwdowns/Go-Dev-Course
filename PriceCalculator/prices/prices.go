@@ -35,11 +35,12 @@ func (job *TaxIncludedPriceJob) loadData() ([]float64, error) {
 	return floats, nil
 }
 
-func (job *TaxIncludedPriceJob) Process() error {
+func (job *TaxIncludedPriceJob) Process(doneChan chan bool, errChan chan error) {
 	inputPrices, err := job.loadData()
 	if err != nil {
 		fmt.Println(fileReaderError)
-		return err
+		errChan <- err
+		return
 	}
 	job.InputPrices = inputPrices
 	result := make(map[string]string)
@@ -49,7 +50,7 @@ func (job *TaxIncludedPriceJob) Process() error {
 	}
 	job.TaxIncludedPrices = result
 	job.IOManager.WriteResult(job)
-	return nil
+	doneChan <- true
 }
 
 func NewTaxIncludedPriceJob(m iomanager.Manager, taxRate float64) *TaxIncludedPriceJob {
