@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"mwdowns.me/price-calculator/converter"
-	"mwdowns.me/price-calculator/filemanager"
+	"mwdowns.me/price-calculator/iomanager"
 )
 
 const fileReaderError = "cannot read file, using defaults"
@@ -14,21 +14,25 @@ const fileReaderError = "cannot read file, using defaults"
 var defaultPrices = []float64{10, 20, 30}
 
 type TaxIncludedPriceJob struct {
-	TaxRate           float64
-	IOManager         filemanager.FileManager
-	InputPrices       []float64
-	TaxIncludedPrices map[string]string
-	CreatedAt         time.Time
+	TaxRate           float64           `json:"tax_rate"`
+	IOManager         iomanager.Manager `json:"-"`
+	InputPrices       []float64         `json:"input_prices"`
+	TaxIncludedPrices map[string]string `json:"tax_included_prices"`
+	CreatedAt         time.Time         `json:"-"`
 }
 
 func (job *TaxIncludedPriceJob) loadData() ([]float64, error) {
 	// get prices from file
-	data, lines, err := job.IOManager.ReadFile()
+	lines, err := job.IOManager.ReadLines()
 	if err != nil {
 		return nil, err
 	}
 
-	return converter.StringsToFloats(data, lines)
+	floats, err := converter.StringsToFloats(lines)
+	if err != nil {
+		return nil, err
+	}
+	return floats, nil
 }
 
 func (job *TaxIncludedPriceJob) Process() error {
@@ -44,15 +48,15 @@ func (job *TaxIncludedPriceJob) Process() error {
 		result[strconv.FormatFloat(price, 'f', 2, 64)] = strconv.FormatFloat(taxPrice, 'f', 2, 64)
 	}
 	job.TaxIncludedPrices = result
-	job.IOManager.WriteJson(job)
+	job.IOManager.WriteResult(job)
 	return nil
 }
 
-func NewTaxIncludedPriceJob(fm filemanager.FileManager, taxRate float64) *TaxIncludedPriceJob {
+func NewTaxIncludedPriceJob(m iomanager.Manager, taxRate float64) *TaxIncludedPriceJob {
 	// Input prices is set to a default and will be overridden by the loadData function
 	return &TaxIncludedPriceJob{
 		TaxRate:     taxRate,
-		IOManager:   fm,
+		IOManager:   m,
 		InputPrices: defaultPrices,
 		CreatedAt:   time.Now(),
 	}

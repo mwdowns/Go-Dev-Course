@@ -12,10 +12,10 @@ type FileManager struct {
 	OutputFilePath string
 }
 
-func (fm FileManager) ReadFile() (*os.File, []string, error) {
+func (fm FileManager) ReadLines() ([]string, error) {
 	data, err := os.Open(fm.InputFilePath)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	scanner := bufio.NewScanner(data)
 	var lines []string
@@ -25,12 +25,13 @@ func (fm FileManager) ReadFile() (*os.File, []string, error) {
 	err = scanner.Err()
 	if err != nil {
 		data.Close()
-		return data, nil, err
+		return nil, err
 	}
-	return data, lines, nil
+	data.Close()
+	return lines, nil
 }
 
-func (fm FileManager) WriteJson(data interface{}) error {
+func (fm FileManager) WriteResult(data interface{}) error {
 	file, err := os.Create(fm.OutputFilePath)
 	if err != nil {
 		return errors.New("failed to create file")
