@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"fmt"
 	"mwdowns/rest-api/db"
 	"time"
 )
@@ -23,19 +24,6 @@ var Objects = map[string]func() interface{}{
 }
 
 func (e Event) Save(table string) (string, error) {
-	//// store in DB
-	//query := `INSERT INTO events (name, description, location, date_time, user_id) VALUES (?, ?, ?, ?, ?)`
-	//stmt, err := db.DB.Prepare(query)
-	//if err != nil {
-	//	return 0, err
-	//}
-	//defer stmt.Close()
-	//
-	//r, err := stmt.Exec(e.Name, e.Description, e.Location, e.DateTime, e.UserID)
-	//if err != nil {
-	//	return 0, err
-	//}
-	//id, _ := r.LastInsertId()
 	obj := map[string]interface{}{
 		"name":        e.Name,
 		"description": e.Description,
@@ -47,7 +35,9 @@ func (e Event) Save(table string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	data, _, err := client.From(table).Insert(obj, false, "", "", "exact").Execute()
+	data, _, err := client.From(table).
+		Insert(obj, false, "", "", "exact").
+		Execute()
 	if err != nil {
 		return "", err
 	}
@@ -74,30 +64,15 @@ func (r result) buildEvent(m map[string]interface{}) Event {
 }
 
 func GetEvents() ([]Event, error) {
-	//	query := `SELECT * FROM events`
-	//	rows, err := db.DB.Query(query)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//	defer rows.Close()
-	//
-	//	var events = []Event{}
-	//	for rows.Next() {
-	//		var event Event
-	//		err = rows.Scan(&event.ID, &event.Name, &event.Description, &event.Location, &event.DateTime, &event.UserID)
-	//		if err != nil {
-	//			return nil, err
-	//		}
-	//		events = append(events, event)
-	//	}
-	//
 	var events []Event
 	var r result
 	client, err := db.Client()
 	if err != nil {
 		return events, err
 	}
-	data, _, err := client.From("events").Select("*", "exact", false).Execute()
+	data, _, err := client.From("events").
+		Select("*", "exact", false).
+		Execute()
 	if err != nil {
 		return events, err
 	}
@@ -110,4 +85,26 @@ func GetEvents() ([]Event, error) {
 	}
 
 	return events, nil
+}
+
+func GetEvent(id string) (Event, error) {
+	var e Event
+	client, err := db.Client()
+	if err != nil {
+		return e, err
+	}
+	data, _, err := client.From("events").
+		Select("*", "1", false).
+		Eq("uuid", id).
+		Execute()
+	if err != nil {
+		fmt.Println("yo")
+		return e, err
+	}
+	var r result
+	err = json.Unmarshal(data, &r)
+	if err != nil {
+		return e, err
+	}
+	return r.buildEvent(r[0].(map[string]interface{})), nil
 }
