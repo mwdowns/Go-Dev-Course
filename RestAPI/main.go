@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"mwdowns/rest-api/models"
 	"net/http"
 
@@ -8,6 +9,7 @@ import (
 )
 
 func main() {
+	//db.InitDB()
 	router := gin.Default()
 	router.GET("/favicon.ico", func(c *gin.Context) { c.JSON(http.StatusOK, gin.H{}) })
 	router.GET("/events", showEvents)
@@ -17,8 +19,13 @@ func main() {
 }
 
 func showEvents(context *gin.Context) {
-	events := models.GetEvents()
+	events, err := models.GetEvents()
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "could not fetch events"})
+		return
+	}
 	context.JSON(http.StatusOK, events)
+	fmt.Printf("this is the first event id: %v\n", events[0].ID)
 }
 
 func createEvent(context *gin.Context) {
@@ -30,8 +37,11 @@ func createEvent(context *gin.Context) {
 		return
 	}
 
-	event.ID = 1
-	event.UserID = 1
-	event.Save()
+	id, err := event.Save("events")
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "could not save event", "error": err.Error()})
+		return
+	}
 	context.JSON(http.StatusCreated, gin.H{"message": "event created", "event": event})
+	fmt.Printf("this is the event id: %v\n", id)
 }

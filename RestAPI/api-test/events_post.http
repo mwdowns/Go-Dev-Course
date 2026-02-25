@@ -4,8 +4,9 @@ content-type: application/json
 
 {
   "name": "Test Event",
-  "description": "A test event",
+  "description": "A test event with db",
   "location": "test location",
-  "dateTime": "2026-02-23T15:30:00.000Z"
+  "dateTime": "2026-02-23T15:30:00.000Z",
+  "userID": 1
 }
 ###
