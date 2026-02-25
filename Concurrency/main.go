@@ -2,10 +2,19 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"time"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		fmt.Println("Error loading .env file")
+		return
+	}
+	fmt.Println(os.Getenv("BLAH"))
 	done := make(chan bool)
 	go greet("hello", done)
 	go greet("Yo", done)
