@@ -1,0 +1,12 @@
+### PUT request to example server
+PUT http://localhost:8080/events/2af35de3-befc-445b-bcd9-187393245c5f
+content-type: application/json
+
+{
+  "name": "updated event again",
+  "description": "updated the event",
+  "location": "Atlanta",
+  "dateTime": "2026-02-23T15:30:00.000Z",
+  "userID": 2
+}
+###

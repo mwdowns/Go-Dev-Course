@@ -8,13 +8,13 @@ import (
 )
 
 type Event struct {
-	ID          int8
+	id          int8
 	Name        string    `binding:"required"`
 	Description string    `binding:"required"`
 	Location    string    `binding:"required"`
 	DateTime    time.Time `binding:"required"`
 	UserID      int
-	uuid        string
+	Uuid        string
 }
 
 type result []any
@@ -24,19 +24,12 @@ var Objects = map[string]func() interface{}{
 }
 
 func (e Event) Save(table string) (string, error) {
-	obj := map[string]interface{}{
-		"name":        e.Name,
-		"description": e.Description,
-		"location":    e.Location,
-		"date_time":   e.DateTime,
-		"user_id":     e.UserID,
-	}
 	client, err := db.Client()
 	if err != nil {
 		return "", err
 	}
 	data, _, err := client.From(table).
-		Insert(obj, false, "", "", "exact").
+		Insert(e.inputs(), false, "", "", "exact").
 		Execute()
 	if err != nil {
 		return "", err
@@ -46,19 +39,30 @@ func (e Event) Save(table string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return r.buildEvent(r[0].(map[string]interface{})).uuid, err
+	return r.buildEvent(r[0].(map[string]interface{})).Uuid, err
+}
+
+func (e Event) Update(table string) (string, error) {
+	client, err := db.Client()
+	if err != nil {
+		return "", err
+	}
+	_, _, err = client.From(table).Update(e.inputs(), "", "exact").Eq("uuid", e.Uuid).Execute()
+	if err != nil {
+		return "", err
+	}
+	return e.Uuid, err
 }
 
 func (r result) buildEvent(m map[string]interface{}) Event {
 	t, _ := time.Parse(time.RFC3339Nano, m["date_time"].(string))
 	e := Event{
-		ID:          int8(m["id"].(float64)),
 		Name:        m["name"].(string),
 		Description: m["description"].(string),
 		Location:    m["location"].(string),
 		DateTime:    t,
 		UserID:      int(m["user_id"].(float64)),
-		uuid:        m["uuid"].(string),
+		Uuid:        m["uuid"].(string),
 	}
 	return e
 }
@@ -107,4 +111,14 @@ func GetEvent(id string) (Event, error) {
 		return e, err
 	}
 	return r.buildEvent(r[0].(map[string]interface{})), nil
+}
+
+func (e Event) inputs() map[string]interface{} {
+	return map[string]interface{}{
+		"name":        e.Name,
+		"description": e.Description,
+		"location":    e.Location,
+		"date_time":   e.DateTime,
+		"user_id":     e.UserID,
+	}
 }
