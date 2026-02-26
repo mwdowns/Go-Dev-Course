@@ -3,6 +3,7 @@ package models
 import (
 	"encoding/json"
 	db "mwdowns/rest-api/DB"
+	"mwdowns/rest-api/utils"
 )
 
 type User struct {
@@ -21,8 +22,13 @@ func (u User) Save() (string, error) {
 	if err != nil {
 		return "", err
 	}
+	// hash email
+	userInputs, err := u.inputs()
+	if err != nil {
+		return "", err
+	}
 	data, _, err := client.From(usersTableName).
-		Insert(u.inputs(), false, "", "", "exact").
+		Insert(userInputs, false, "", "", "exact").
 		Execute()
 	if err != nil {
 		return "", err
@@ -35,13 +41,18 @@ func (u User) Save() (string, error) {
 	return r.buildUser(r[0].(map[string]interface{})).Uuid, err
 }
 
-func (u User) inputs() map[string]interface{} {
+func (u User) inputs() (map[string]interface{}, error) {
+	hashedPassword, err := utils.HashPassword(u.Password)
+	if err != nil {
+		return nil, err
+	}
+
 	return map[string]interface{}{
-		"email":      u.Email,
+		"email":      hashedPassword,
 		"password":   u.Password,
 		"first_name": u.FirstName,
 		"last_name":  u.LastName,
-	}
+	}, nil
 }
 
 func (r result) buildUser(m map[string]interface{}) User {

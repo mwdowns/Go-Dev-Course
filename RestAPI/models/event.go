@@ -12,7 +12,7 @@ type Event struct {
 	Description string    `binding:"required"`
 	Location    string    `binding:"required"`
 	DateTime    time.Time `binding:"required"`
-	UserID      int
+	UserID      string
 	Uuid        string
 }
 
@@ -58,7 +58,7 @@ func (r result) buildEvent(m map[string]interface{}) Event {
 		Description: m["description"].(string),
 		Location:    m["location"].(string),
 		DateTime:    t,
-		UserID:      int(m["user_id"].(float64)),
+		UserID:      m["user_id"].(string),
 		Uuid:        m["uuid"].(string),
 	}
 	return e

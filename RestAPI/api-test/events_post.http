@@ -7,6 +7,6 @@ content-type: application/json
   "description": "A test event with interface stuff",
   "location": "interface city",
   "dateTime": "2026-02-23T15:30:00.000Z",
-  "userID": 1
+  "userID": "fe4e1b66-0b94-4584-9344-f064ae661628"
 }
 ###

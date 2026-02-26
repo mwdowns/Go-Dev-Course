@@ -3,8 +3,8 @@ POST http://localhost:8080/users
 content-type: application/json
 
 {
-  "Email": "bob@bob.com",
-  "Password": "Password123!",
+  "email": "bob@bob2.com",
+  "password": "Password123!",
   "firstName": "Bob",
   "lastName": "Bobson"
 }
