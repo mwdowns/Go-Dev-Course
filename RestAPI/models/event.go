@@ -113,6 +113,18 @@ func GetEvent(id string) (Event, error) {
 	return r.buildEvent(r[0].(map[string]interface{})), nil
 }
 
+func DeleteEvent(id string) error {
+	client, err := db.Client()
+	if err != nil {
+		return err
+	}
+	_, _, err = client.From(eventsTableName).Delete("", "exact").Eq("uuid", id).Execute()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (e Event) inputs() map[string]interface{} {
 	return map[string]interface{}{
 		"name":        e.Name,
