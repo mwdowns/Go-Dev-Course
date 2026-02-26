@@ -2,7 +2,6 @@ package models
 
 import (
 	"encoding/json"
-	"fmt"
 	"mwdowns/rest-api/db"
 	"time"
 )
@@ -17,18 +16,20 @@ type Event struct {
 	Uuid        string
 }
 
+const eventsTableName = "events"
+
 type result []any
 
 var Objects = map[string]func() interface{}{
 	"events": func() interface{} { return &Event{} },
 }
 
-func (e Event) Save(table string) (string, error) {
+func (e Event) Save() (string, error) {
 	client, err := db.Client()
 	if err != nil {
 		return "", err
 	}
-	data, _, err := client.From(table).
+	data, _, err := client.From(eventsTableName).
 		Insert(e.inputs(), false, "", "", "exact").
 		Execute()
 	if err != nil {
@@ -42,12 +43,12 @@ func (e Event) Save(table string) (string, error) {
 	return r.buildEvent(r[0].(map[string]interface{})).Uuid, err
 }
 
-func (e Event) Update(table string) (string, error) {
+func (e Event) Update() (string, error) {
 	client, err := db.Client()
 	if err != nil {
 		return "", err
 	}
-	_, _, err = client.From(table).Update(e.inputs(), "", "exact").Eq("uuid", e.Uuid).Execute()
+	_, _, err = client.From(eventsTableName).Update(e.inputs(), "", "exact").Eq("uuid", e.Uuid).Execute()
 	if err != nil {
 		return "", err
 	}
@@ -74,7 +75,7 @@ func GetEvents() ([]Event, error) {
 	if err != nil {
 		return events, err
 	}
-	data, _, err := client.From("events").
+	data, _, err := client.From(eventsTableName).
 		Select("*", "exact", false).
 		Execute()
 	if err != nil {
@@ -97,12 +98,11 @@ func GetEvent(id string) (Event, error) {
 	if err != nil {
 		return e, err
 	}
-	data, _, err := client.From("events").
+	data, _, err := client.From(eventsTableName).
 		Select("*", "1", false).
 		Eq("uuid", id).
 		Execute()
 	if err != nil {
-		fmt.Println("yo")
 		return e, err
 	}
 	var r result

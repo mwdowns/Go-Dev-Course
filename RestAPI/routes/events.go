@@ -28,7 +28,7 @@ func createEvent(context *gin.Context) {
 		return
 	}
 
-	id, err := event.Save("events")
+	id, err := event.Save()
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"message": "could not save event", "error": err.Error()})
 		return
@@ -62,7 +62,7 @@ func updateEvent(context *gin.Context) {
 		return
 	}
 	updatedEvent.Uuid = id
-	id, err = updatedEvent.Update("events")
+	id, err = updatedEvent.Update()
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"message": "could not update event", "error": err.Error()})
 		return

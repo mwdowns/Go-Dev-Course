@@ -3,9 +3,9 @@ POST http://localhost:8080/events
 content-type: application/json
 
 {
-  "name": "Test Event",
-  "description": "A test event with db",
-  "location": "test location",
+  "name": "Test Interfaces Event",
+  "description": "A test event with interface stuff",
+  "location": "interface city",
   "dateTime": "2026-02-23T15:30:00.000Z",
   "userID": 1
 }
