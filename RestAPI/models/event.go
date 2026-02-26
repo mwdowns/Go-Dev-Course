@@ -2,7 +2,7 @@ package models
 
 import (
 	"encoding/json"
-	"mwdowns/rest-api/db"
+	"mwdowns/rest-api/DB"
 	"time"
 )
 
@@ -19,10 +19,6 @@ type Event struct {
 const eventsTableName = "events"
 
 type result []any
-
-var Objects = map[string]func() interface{}{
-	"events": func() interface{} { return &Event{} },
-}
 
 func (e Event) Save() (string, error) {
 	client, err := db.Client()
