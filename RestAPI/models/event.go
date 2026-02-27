@@ -51,6 +51,16 @@ func (e Event) Update() (string, error) {
 	return e.Uuid, err
 }
 
+func (e Event) inputs() map[string]interface{} {
+	return map[string]interface{}{
+		"name":        e.Name,
+		"description": e.Description,
+		"location":    e.Location,
+		"date_time":   e.DateTime,
+		"user_id":     e.UserID,
+	}
+}
+
 func (r result) buildEvent(m map[string]interface{}) Event {
 	t, _ := time.Parse(time.RFC3339Nano, m["date_time"].(string))
 	e := Event{
@@ -109,7 +119,7 @@ func GetEvent(id string) (Event, error) {
 	return r.buildEvent(r[0].(map[string]interface{})), nil
 }
 
-func DeleteEvent(id string) error {
+func (e Event) Delete() error {
 	client, err := db.Client()
 	if err != nil {
 		return err
@@ -119,14 +129,4 @@ func DeleteEvent(id string) error {
 		return err
 	}
 	return nil
-}
-
-func (e Event) inputs() map[string]interface{} {
-	return map[string]interface{}{
-		"name":        e.Name,
-		"description": e.Description,
-		"location":    e.Location,
-		"date_time":   e.DateTime,
-		"user_id":     e.UserID,
-	}
 }
