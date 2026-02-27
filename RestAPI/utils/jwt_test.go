@@ -2,7 +2,7 @@ package utils
 
 import "testing"
 
-const secret = "secret"
+//const secret = "secret"
 
 func TestGenerateToken(t *testing.T) {
 	type args struct {
