@@ -19,6 +19,7 @@ type User struct {
 }
 
 const usersTableName = "users"
+const loginErrorMessage = "credentials invalid"
 
 func (u User) Save() (string, error) {
 	client, userInputs, err := initializeClientAndGetInputs(u)
@@ -43,7 +44,7 @@ func (u User) ValidateUser() (bool, User, error) {
 		Eq("email", u.Email).
 		Execute()
 	if err != nil {
-		return false, u, errors.New("wrong email")
+		return false, u, errors.New(loginErrorMessage)
 	}
 	var r result
 	err = json.Unmarshal(data, &r)
@@ -54,7 +55,7 @@ func (u User) ValidateUser() (bool, User, error) {
 	if utils.CheckPasswordHash(u.Password, retunedUser.Password) {
 		return true, retunedUser, nil
 	}
-	return false, u, errors.New("wrong password")
+	return false, u, errors.New(loginErrorMessage)
 }
 
 func (u User) inputs() (map[string]interface{}, error) {

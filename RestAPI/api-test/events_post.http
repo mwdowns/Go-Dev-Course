@@ -1,12 +1,13 @@
 ### POST request to example server
 POST http://localhost:8080/events
 content-type: application/json
+authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImJvYkBib2IuY29tIiwiZXhwIjoxNzcyMjIzNjc2LCJ1c2VySWQiOiJlNmJhMjg0Ni00NTEwLTQ4YjktYmQ2Yi0zNzg2ZmJmMzI3YWMifQ.11_8lR_F-daQPwSZvBQa57yACgi9mFgLQN_VPTVMPKE
 
 {
   "name": "Test Interfaces Event",
   "description": "A test event with interface stuff",
   "location": "interface city",
   "dateTime": "2026-02-23T15:30:00.000Z",
-  "userID": "fe4e1b66-0b94-4584-9344-f064ae661628"
+  "userID": "e6ba2846-4510-48b9-bd6b-3786fbf327ac"
 }
 ###
