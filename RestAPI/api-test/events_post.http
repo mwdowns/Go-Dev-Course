@@ -1,12 +1,12 @@
 ### POST request to example server
 POST http://localhost:8080/events
 content-type: application/json
-authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImJvYkBib2IuY29tIiwiZXhwIjoxNzcyMjMyNDc2LCJ1c2VySWQiOiJlNmJhMjg0Ni00NTEwLTQ4YjktYmQ2Yi0zNzg2ZmJmMzI3YWMifQ._dyOdMGzvGceB8EjxIG8Jwaue97aBcSk9vp-9xca4Uk
+authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImJvYkBib2IuY29tIiwiZXhwIjoxNzcyNDAyOTMzLCJ1c2VySWQiOjF9.OweDg2zFihb7VC71ow6qRtgcrFdvJG60dN-PhmTA8sU
 
 {
-  "name": "Test Interfaces Event",
-  "description": "A test event with interface stuff",
-  "location": "interface city",
-  "dateTime": "2026-02-23T15:30:00.000Z"
+  "name": "Testing Event",
+  "description": "A test event",
+  "location": "interface city 2",
+  "date_time": "2026-02-23T15:30:00.000Z"
 }
 ###

@@ -1,132 +1,109 @@
 package models
 
 import (
-	"encoding/json"
 	"mwdowns/rest-api/DB"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Event struct {
-	id          int8
-	Name        string    `binding:"required"`
-	Description string    `binding:"required"`
-	Location    string    `binding:"required"`
-	DateTime    time.Time `binding:"required"`
-	UserID      string
-	Uuid        string
+	Id          int64     `json:"id"`
+	Name        string    `binding:"required" json:"name"`
+	Description string    `binding:"required" json:"description"`
+	Location    string    `binding:"required" json:"location"`
+	DateTime    time.Time `binding:"required" json:"date_time"`
+	UserID      int64     `json:"user_id"`
+	Uuid        uuid.UUID `json:"uuid"`
 }
 
-const eventsTableName = "events"
-
-type result []any
+const saveEventQuery = "INSERT INTO events(name, description, location, dateTime, uuid, user_id) VALUES (?, ?, ?, ?, ?, ?)"
+const updateEventQuery = "UPDATE events SET name = ?, description = ?, location = ?, dateTime = ? WHERE uuid = ?"
+const deleteEventQuery = "DELETE FROM events WHERE uuid = ?"
+const getAllEventsQuery = "SELECT name, description, location, dateTime, uuid, user_id FROM events"
+const getEventQuery = "SELECT name, description, location, dateTime, uuid, user_id FROM events WHERE uuid = ?"
 
 func (e Event) Save() (string, error) {
-	client, err := db.Client()
+	eventUuid := uuid.New()
+	e.Uuid = eventUuid
+	stmt, err := db.DB.Prepare(saveEventQuery)
 	if err != nil {
 		return "", err
 	}
-	data, _, err := client.From(eventsTableName).
-		Insert(e.inputs(), false, "", "", "exact").
-		Execute()
+	defer stmt.Close()
+
+	result, err := stmt.Exec(e.Name, e.Description, e.Location, e.DateTime, e.Uuid, e.UserID)
 	if err != nil {
 		return "", err
 	}
-	var r result
-	err = json.Unmarshal(data, &r)
+
+	_, err = result.LastInsertId()
 	if err != nil {
 		return "", err
 	}
-	return r.buildEvent(r[0].(map[string]interface{})).Uuid, err
+
+	return eventUuid.String(), nil
 }
 
 func (e Event) Update() (string, error) {
-	client, err := db.Client()
+	stmt, err := db.DB.Prepare(updateEventQuery)
+
 	if err != nil {
 		return "", err
 	}
-	_, _, err = client.From(eventsTableName).Update(e.inputs(), "", "exact").Eq("uuid", e.Uuid).Execute()
+
+	defer stmt.Close()
+
+	_, err = stmt.Exec(e.Name, e.Description, e.Location, e.DateTime, e.Uuid)
 	if err != nil {
 		return "", err
 	}
-	return e.Uuid, err
+	return e.Uuid.String(), err
 }
 
-func (e Event) inputs() map[string]interface{} {
-	return map[string]interface{}{
-		"name":        e.Name,
-		"description": e.Description,
-		"location":    e.Location,
-		"date_time":   e.DateTime,
-		"user_id":     e.UserID,
-	}
-}
+func (e Event) Delete() error {
+	stmt, err := db.DB.Prepare(deleteEventQuery)
 
-func (r result) buildEvent(m map[string]interface{}) Event {
-	t, _ := time.Parse(time.RFC3339Nano, m["date_time"].(string))
-	e := Event{
-		Name:        m["name"].(string),
-		Description: m["description"].(string),
-		Location:    m["location"].(string),
-		DateTime:    t,
-		UserID:      m["user_id"].(string),
-		Uuid:        m["uuid"].(string),
+	if err != nil {
+		return err
 	}
-	return e
+
+	defer stmt.Close()
+
+	_, err = stmt.Exec(e.Uuid)
+	return err
 }
 
 func GetEvents() ([]Event, error) {
-	var events []Event
-	var r result
-	client, err := db.Client()
+	rows, err := db.DB.Query(getAllEventsQuery)
 	if err != nil {
-		return events, err
+		return nil, err
 	}
-	data, _, err := client.From(eventsTableName).
-		Select("*", "exact", false).
-		Execute()
-	if err != nil {
-		return events, err
-	}
-	err = json.Unmarshal(data, &r)
+	defer rows.Close()
 
-	for i, _ := range r {
-		m := r[i].(map[string]interface{})
-		e := r.buildEvent(m)
-		events = append(events, e)
+	var events []Event
+
+	for rows.Next() {
+		var event Event
+		err := rows.Scan(&event.Name, &event.Description, &event.Location, &event.DateTime, &event.Uuid, &event.UserID)
+
+		if err != nil {
+			return nil, err
+		}
+
+		events = append(events, event)
 	}
 
 	return events, nil
 }
 
-func GetEvent(id string) (Event, error) {
-	var e Event
-	client, err := db.Client()
+func GetEvent(id uuid.UUID) (*Event, error) {
+	row := db.DB.QueryRow(getEventQuery, id)
+	var event Event
+	err := row.Scan(&event.Name, &event.Description, &event.Location, &event.DateTime, &event.Uuid, &event.UserID)
 	if err != nil {
-		return e, err
+		return nil, err
 	}
-	data, _, err := client.From(eventsTableName).
-		Select("*", "1", false).
-		Eq("uuid", id).
-		Execute()
-	if err != nil {
-		return e, err
-	}
-	var r result
-	err = json.Unmarshal(data, &r)
-	if err != nil {
-		return e, err
-	}
-	return r.buildEvent(r[0].(map[string]interface{})), nil
-}
 
-func (e Event) Delete() error {
-	client, err := db.Client()
-	if err != nil {
-		return err
-	}
-	_, _, err = client.From(eventsTableName).Delete("", "exact").Eq("uuid", id).Execute()
-	if err != nil {
-		return err
-	}
-	return nil
+	return &event, nil
 }

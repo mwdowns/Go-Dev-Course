@@ -7,7 +7,10 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
+
+const eventsName = "event"
 
 func showEvents(context *gin.Context) {
 	events, err := models.GetEvents()
@@ -21,7 +24,11 @@ func showEvents(context *gin.Context) {
 
 func showEvent(context *gin.Context) {
 	id := context.Param("id")
-	e, err := models.GetEvent(id)
+	parsedId, err := uuid.Parse(id)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "could not parse event id", "error": err.Error()})
+	}
+	e, err := models.GetEvent(parsedId)
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "could not get event", "error": err.Error()})
 		return
@@ -34,30 +41,26 @@ func createEvent(context *gin.Context) {
 	// takes in from post and turns it into Event
 	var event models.Event
 	err := context.ShouldBindJSON(&event)
-	// the token has the userId for who created the event, so we attach it to the event
-	userId, ok := context.Get("userId")
-	if !ok {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "could not get userId", "error": err.Error()})
-	}
-	event.UserID = userId.(string)
-
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "could not parse request body", "error": err.Error()})
 		return
 	}
-
-	id, err := event.Save()
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "could not save event", "error": err.Error()})
-		return
+	// the token has the userId for who created the event, so we attach it to the event
+	userId, ok := context.Get("userId")
+	if !ok {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "could not get userId from context", "error": err.Error()})
 	}
-	context.JSON(http.StatusCreated, gin.H{"message": "event created", "event": event})
-	fmt.Printf("this is the event id: %v\n", id)
+	event.UserID = userId.(int64)
+	createObject(event, context, eventsName)
 }
 
 func updateEvent(context *gin.Context) {
 	id := context.Param("id")
-	_, err := models.GetEvent(id)
+	parsedUuid, err := uuid.Parse(id)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"message": "could not parse id", "error": err.Error()})
+	}
+	event, err := models.GetEvent(parsedUuid)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"message": "could not get event", "error": err.Error()})
 		return
@@ -69,24 +72,22 @@ func updateEvent(context *gin.Context) {
 		return
 	}
 
-	eventUserId := updatedEvent.UserID
+	updatedEvent.Uuid = parsedUuid
+	eventUserId := event.UserID
 	if !middleware.CheckUser(context, eventUserId) {
 		context.JSON(http.StatusUnauthorized, gin.H{"message": "unauthorized", "error": "unauthorized"})
 		return
 	}
-
-	updatedEvent.Uuid = id
-	id, err = updatedEvent.Update()
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "could not update event", "error": err.Error()})
-		return
-	}
-	context.JSON(http.StatusOK, gin.H{"message": "event updated", "event_id": id})
+	updateObject(updatedEvent, context, eventsName)
 }
 
 func removeEvent(context *gin.Context) {
 	id := context.Param("id")
-	e, err := models.GetEvent(id)
+	parsedUuid, err := uuid.Parse(id)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"message": "could not parse id", "error": err.Error()})
+	}
+	e, err := models.GetEvent(parsedUuid)
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"message": "could event to delete", "error": err.Error()})
 		return
@@ -95,9 +96,5 @@ func removeEvent(context *gin.Context) {
 		context.JSON(http.StatusUnauthorized, gin.H{"message": "unauthorized", "error": "unauthorized"})
 		return
 	}
-	err = e.Delete()
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "could not delete event", "error": err.Error()})
-	}
-	context.JSON(http.StatusOK, gin.H{"message": "event deleted", "event_id": id})
+	deleteObject(e, context, eventsName)
 }

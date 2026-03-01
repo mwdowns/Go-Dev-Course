@@ -9,7 +9,7 @@ import (
 
 const secretKey = "secret123!"
 
-func GenerateToken(email string, userId string) (string, error) {
+func GenerateToken(email string, userId int64) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email":  email,
 		"userId": userId,
@@ -18,7 +18,7 @@ func GenerateToken(email string, userId string) (string, error) {
 	return token.SignedString([]byte(secretKey))
 }
 
-func VerifyToken(tokenString string) (string, error) {
+func VerifyToken(tokenString string) (int64, error) {
 	parsedToken, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("could not parse token")
@@ -26,17 +26,17 @@ func VerifyToken(tokenString string) (string, error) {
 		return []byte(secretKey), nil
 	})
 	if err != nil {
-		return "", err
+		return 0, err
 	}
 
 	if !parsedToken.Valid {
-		return "", errors.New("invalid token")
+		return 0, errors.New("invalid token")
 	}
 
 	claims, ok := parsedToken.Claims.(jwt.MapClaims)
 	if !ok {
-		return "", errors.New("could not parse claims")
+		return 0, errors.New("could not parse claims")
 	}
-	userId := claims["userId"].(string)
+	userId := int64(claims["userId"].(float64))
 	return userId, nil
 }

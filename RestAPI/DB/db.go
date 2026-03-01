@@ -1,20 +1,61 @@
 package db
 
 import (
-	"os"
+	"database/sql"
 
-	"github.com/joho/godotenv"
-	"github.com/supabase-community/supabase-go"
+	_ "github.com/mattn/go-sqlite3"
 )
 
-func Client() (*supabase.Client, error) {
-	err := godotenv.Load(".env")
+var DB *sql.DB
+
+func InitDB() {
+	var err error
+	DB, err = sql.Open("sqlite3", "api.db")
+
 	if err != nil {
-		return nil, err
+		panic("Could not connect to database.")
 	}
-	client, err := supabase.NewClient(os.Getenv("SUPABASE_URL"), os.Getenv("SUPABASE_KEY"), nil)
+
+	DB.SetMaxOpenConns(10)
+	DB.SetMaxIdleConns(5)
+
+	createTables()
+}
+
+func createTables() {
+	createUsersTable := `
+	CREATE TABLE IF NOT EXISTS users (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		email TEXT NOT NULL UNIQUE,
+		password TEXT NOT NULL,
+		first_name TEXT NOT NULL,
+		last_name TEXT NOT NULL,
+		uuid UUID NOT NULL
+	)
+	`
+
+	_, err := DB.Exec(createUsersTable)
+
 	if err != nil {
-		return nil, err
+		panic("Could not create users table.")
 	}
-	return client, nil
+
+	createEventsTable := `
+	CREATE TABLE IF NOT EXISTS events (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		uuid UUID NOT NULL,
+		name TEXT NOT NULL,
+		description TEXT NOT NULL,
+		location TEXT NOT NULL,
+		dateTime DATETIME NOT NULL,
+		user_id INTEGER NOT NULL,
+		FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+	)
+	`
+
+	_, err = DB.Exec(createEventsTable)
+
+	if err != nil {
+		panic("Could not create events table.")
+	}
 }

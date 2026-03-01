@@ -1,4 +1,5 @@
 ### DELETE request to example server
-DELETE http://localhost:8080/events/58ec6c7f-d658-4a80-80b5-5908bb86908d
+DELETE http://localhost:8080/events/343d6e51-8ca7-4393-a5e0-2e22d21d44c1
+authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImJvYkBib2IuY29tIiwiZXhwIjoxNzcyNDAyOTMzLCJ1c2VySWQiOjF9.OweDg2zFihb7VC71ow6qRtgcrFdvJG60dN-PhmTA8sU
 
 ###

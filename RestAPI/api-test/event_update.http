@@ -1,12 +1,12 @@
 ### PUT request to example server
-PUT http://localhost:8080/events/2af35de3-befc-445b-bcd9-187393245c5f
+PUT http://localhost:8080/events/343d6e51-8ca7-4393-a5e0-2e22d21d44c1
 content-type: application/json
+authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImJvYkBib2IuY29tIiwiZXhwIjoxNzcyNDAyOTMzLCJ1c2VySWQiOjF9.OweDg2zFihb7VC71ow6qRtgcrFdvJG60dN-PhmTA8sU
 
 {
-  "name": "updated event again",
+  "name": "updated event",
   "description": "updated the event",
   "location": "Atlanta",
-  "dateTime": "2026-02-23T15:30:00.000Z",
-  "userID": 2
+  "date_time": "2026-02-23T15:30:00.000Z"
 }
 ###

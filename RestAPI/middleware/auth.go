@@ -21,9 +21,9 @@ func Authenticate(context *gin.Context) {
 	context.Next()
 }
 
-func CheckUser(context *gin.Context, eventUserId string) bool {
+func CheckUser(context *gin.Context, eventUserId int64) bool {
 	userId, _ := context.Get("userId")
-	if userId.(string) != eventUserId {
+	if userId.(int64) != eventUserId {
 		return false
 	}
 	return true
